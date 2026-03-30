@@ -24,12 +24,13 @@ export default function BottomNav() {
       padding: '10px 0',
       zIndex: 50,
     }}>
-      {items.map(({ icon: Icon, label, path }) => {
-        const active = location.pathname === path || (path === '/' && location.pathname === '/dashboard')
+      {items.map((item) => {
+        const active = location.pathname === item.path || (item.path === '/' && location.pathname === '/dashboard')
+        const NavIcon = item.icon
         return (
           <button
-            key={path}
-            onClick={() => navigate(path)}
+            key={item.path}
+            onClick={() => navigate(item.path)}
             style={{
               display: 'flex',
               flexDirection: 'column',
@@ -43,8 +44,8 @@ export default function BottomNav() {
               transition: 'color 0.2s',
             }}
           >
-            <Icon size={24} />
-            <span style={{ fontSize: '11px', fontWeight: active ? '600' : '400' }}>{label}</span>
+            <NavIcon size={24} />
+            <span style={{ fontSize: '11px', fontWeight: active ? '600' : '400' }}>{item.label}</span>
           </button>
         )
       })}

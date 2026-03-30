@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect } from 'react'
+import { createContext, useContext, useState } from 'react'
 
 const AppContext = createContext()
 
@@ -38,39 +38,51 @@ const MOCK_ALERTS = [
 ]
 
 export function AppProvider({ children }) {
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
-  const [user, setUser] = useState(null)
-  const [hasSeenOnboarding, setHasSeenOnboarding] = useState(false)
+  const [isAuthenticated, setIsAuthenticated] = useState(() => {
+    try { return !!localStorage.getItem('mp_auth') } catch { return false }
+  })
+  const [user, setUser] = useState(() => {
+    try {
+      const auth = localStorage.getItem('mp_auth')
+      return auth ? JSON.parse(auth).user : null
+    } catch { return null }
+  })
+  const [hasSeenOnboarding, setHasSeenOnboarding] = useState(() => {
+    try { return !!localStorage.getItem('mp_onboarding') } catch { return false }
+  })
   const [threatLevel, setThreatLevel] = useState(15)
   const [status, setStatus] = useState('safe') // safe, alert, danger
-  const [contacts, setContacts] = useState(MOCK_CONTACTS)
-  const [keywords, setKeywords] = useState(MOCK_KEYWORDS)
-  const [alerts, setAlerts] = useState(MOCK_ALERTS)
-  const [sensitivity, setSensitivity] = useState('medium')
-  const [dataRetention, setDataRetention] = useState('7d')
+  const [contacts, setContacts] = useState(() => {
+    try {
+      const saved = localStorage.getItem('mp_contacts')
+      return saved ? JSON.parse(saved) : MOCK_CONTACTS
+    } catch { return MOCK_CONTACTS }
+  })
+  const [keywords, setKeywords] = useState(() => {
+    try {
+      const saved = localStorage.getItem('mp_keywords')
+      return saved ? JSON.parse(saved) : MOCK_KEYWORDS
+    } catch { return MOCK_KEYWORDS }
+  })
+  const [alerts, setAlerts] = useState(() => {
+    try {
+      const saved = localStorage.getItem('mp_alerts')
+      return saved ? JSON.parse(saved) : MOCK_ALERTS
+    } catch { return MOCK_ALERTS }
+  })
+  const [sensitivity, setSensitivity] = useState(() => {
+    try {
+      const saved = localStorage.getItem('mp_settings')
+      return saved ? (JSON.parse(saved).sensitivity || 'medium') : 'medium'
+    } catch { return 'medium' }
+  })
+  const [dataRetention, setDataRetention] = useState(() => {
+    try {
+      const saved = localStorage.getItem('mp_settings')
+      return saved ? (JSON.parse(saved).dataRetention || '7d') : '7d'
+    } catch { return '7d' }
+  })
   const [emergencyActive, setEmergencyActive] = useState(false)
-
-  useEffect(() => {
-    const auth = localStorage.getItem('mp_auth')
-    const onboarding = localStorage.getItem('mp_onboarding')
-    const savedContacts = localStorage.getItem('mp_contacts')
-    const savedKeywords = localStorage.getItem('mp_keywords')
-    const savedSettings = localStorage.getItem('mp_settings')
-    
-    if (auth) {
-      const authData = JSON.parse(auth)
-      setIsAuthenticated(true)
-      setUser(authData.user)
-    }
-    if (onboarding) setHasSeenOnboarding(true)
-    if (savedContacts) setContacts(JSON.parse(savedContacts))
-    if (savedKeywords) setKeywords(JSON.parse(savedKeywords))
-    if (savedSettings) {
-      const s = JSON.parse(savedSettings)
-      setSensitivity(s.sensitivity || 'medium')
-      setDataRetention(s.dataRetention || '7d')
-    }
-  }, [])
 
   const login = (email, password) => {
     if (!email || !password || password.length < 6) return false
@@ -138,7 +150,13 @@ export function AppProvider({ children }) {
       status: 'pending',
       description: 'SOS acionado - Emergência confirmada',
     }
-    setAlerts(prev => [newAlert, ...prev])
+    setAlerts(prev => {
+      const updated = [newAlert, ...prev]
+      try { localStorage.setItem('mp_alerts', JSON.stringify(updated)) } catch (err) {
+        console.error('[MeuProtetor] Falha ao persistir alerta de emergência:', err)
+      }
+      return updated
+    })
     setEmergencyActive(false)
     setStatus('alert')
     setThreatLevel(60)
@@ -163,4 +181,5 @@ export function AppProvider({ children }) {
   )
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useApp = () => useContext(AppContext)

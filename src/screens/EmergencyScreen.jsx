@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useMemo } from 'react'
 import { useApp } from '../context/AppContext'
 import { useNavigate } from 'react-router-dom'
 import { AlertTriangle, Mic, X } from 'lucide-react'
@@ -19,7 +19,6 @@ export default function EmergencyScreen({ overlay }) {
   const { cancelEmergency, confirmEmergency } = useApp()
   const navigate = useNavigate()
   const [countdown, setCountdown] = useState(30)
-  const [transcription, setTranscription] = useState([MOCK_TRANSCRIPTION[0]])
   const transcriptRef = useRef(null)
   const confirmed = useRef(false)
 
@@ -29,6 +28,11 @@ export default function EmergencyScreen({ overlay }) {
   useEffect(() => { confirmEmergencyRef.current = confirmEmergency }, [confirmEmergency])
   useEffect(() => { navigateRef.current = navigate }, [navigate])
   useEffect(() => { overlayRef.current = overlay }, [overlay])
+
+  const transcription = useMemo(() => {
+    const idx = Math.floor((30 - countdown) / (30 / MOCK_TRANSCRIPTION.length))
+    return MOCK_TRANSCRIPTION.slice(0, Math.min(idx + 1, MOCK_TRANSCRIPTION.length))
+  }, [countdown])
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -47,16 +51,6 @@ export default function EmergencyScreen({ overlay }) {
     }, 1000)
     return () => clearInterval(timer)
   }, [])
-
-  useEffect(() => {
-    const idx = Math.floor((30 - countdown) / (30 / MOCK_TRANSCRIPTION.length))
-    setTranscription(prev => {
-      if (idx < MOCK_TRANSCRIPTION.length && idx >= prev.length) {
-        return MOCK_TRANSCRIPTION.slice(0, idx + 1)
-      }
-      return prev
-    })
-  }, [countdown])
 
   useEffect(() => {
     if (transcriptRef.current) {

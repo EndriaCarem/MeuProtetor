@@ -1,0 +1,19 @@
+{
+  "name": "MeuProtetor",
+  "short_name": "MeuProtetor",
+  "description": "Proteção pessoal com IA — monitora seu ambiente e aciona ajuda em emergências.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0a0a0f",
+  "theme_color": "#6b21a8",
+  "orientation": "portrait-primary",
+  "lang": "pt-BR",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
