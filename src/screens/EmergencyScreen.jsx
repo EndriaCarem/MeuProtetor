@@ -23,18 +23,22 @@ export default function EmergencyScreen({ overlay }) {
   const transcriptRef = useRef(null)
   const confirmed = useRef(false)
 
+  const confirmEmergencyRef = useRef(confirmEmergency)
+  const navigateRef = useRef(navigate)
+  const overlayRef = useRef(overlay)
+  useEffect(() => { confirmEmergencyRef.current = confirmEmergency }, [confirmEmergency])
+  useEffect(() => { navigateRef.current = navigate }, [navigate])
+  useEffect(() => { overlayRef.current = overlay }, [overlay])
+
   useEffect(() => {
-    const stableConfirm = confirmEmergency
-    const stableNavigate = navigate
-    const isOverlay = overlay
     const timer = setInterval(() => {
       setCountdown(prev => {
         if (prev <= 1) {
           clearInterval(timer)
           if (!confirmed.current) {
             confirmed.current = true
-            stableConfirm()
-            if (!isOverlay) stableNavigate('/')
+            confirmEmergencyRef.current()
+            if (!overlayRef.current) navigateRef.current('/')
           }
           return 0
         }
@@ -42,7 +46,6 @@ export default function EmergencyScreen({ overlay }) {
       })
     }, 1000)
     return () => clearInterval(timer)
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   useEffect(() => {

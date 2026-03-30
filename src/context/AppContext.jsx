@@ -73,6 +73,7 @@ export function AppProvider({ children }) {
   }, [])
 
   const login = (email, password) => {
+    if (!email || !password || password.length < 6) return false
     const userData = { email, name: email.split('@')[0] }
     localStorage.setItem('mp_auth', JSON.stringify({ user: userData }))
     setUser(userData)
@@ -81,6 +82,7 @@ export function AppProvider({ children }) {
   }
 
   const register = (name, email, password) => {
+    if (!name || !email || !password || password.length < 6) return false
     const userData = { email, name }
     localStorage.setItem('mp_auth', JSON.stringify({ user: userData }))
     setUser(userData)
