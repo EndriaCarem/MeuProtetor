@@ -47,9 +47,12 @@ export default function EmergencyScreen({ overlay }) {
 
   useEffect(() => {
     const idx = Math.floor((30 - countdown) / (30 / MOCK_TRANSCRIPTION.length))
-    if (idx < MOCK_TRANSCRIPTION.length && idx >= transcription.length) {
-      setTranscription(MOCK_TRANSCRIPTION.slice(0, idx + 1))
-    }
+    setTranscription(prev => {
+      if (idx < MOCK_TRANSCRIPTION.length && idx >= prev.length) {
+        return MOCK_TRANSCRIPTION.slice(0, idx + 1)
+      }
+      return prev
+    })
   }, [countdown])
 
   useEffect(() => {
