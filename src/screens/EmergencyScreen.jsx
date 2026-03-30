@@ -24,14 +24,17 @@ export default function EmergencyScreen({ overlay }) {
   const confirmed = useRef(false)
 
   useEffect(() => {
+    const stableConfirm = confirmEmergency
+    const stableNavigate = navigate
+    const isOverlay = overlay
     const timer = setInterval(() => {
       setCountdown(prev => {
         if (prev <= 1) {
           clearInterval(timer)
           if (!confirmed.current) {
             confirmed.current = true
-            confirmEmergency()
-            if (!overlay) navigate('/')
+            stableConfirm()
+            if (!isOverlay) stableNavigate('/')
           }
           return 0
         }
@@ -39,6 +42,7 @@ export default function EmergencyScreen({ overlay }) {
       })
     }, 1000)
     return () => clearInterval(timer)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   useEffect(() => {
