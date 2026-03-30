@@ -1,0 +1,65 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                String             @id @default(cuid())
+  email             String             @unique
+  phone             String?
+  name              String
+  passwordHash      String
+  keywords          String[]           @default(["socorro", "ajuda", "meuprotetor"])
+  sensitivityLevel  Int                @default(3)
+  retentionDays     Int                @default(30)
+  isActive          Boolean            @default(true)
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  emergencyContacts EmergencyContact[]
+  emergencies       Emergency[]
+  recordings        Recording[]
+}
+
+model EmergencyContact {
+  id           String   @id @default(cuid())
+  userId       String
+  name         String
+  relationship String
+  phone        String?
+  whatsapp     String?
+  email        String?
+  priority     Int      @default(1)
+  createdAt    DateTime @default(now())
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Emergency {
+  id          String    @id @default(cuid())
+  userId      String
+  latitude    Float
+  longitude   Float
+  threatLevel String
+  confidence  Int?
+  transcript  String?
+  audioUrl    String?
+  threats     String[]
+  status      String    @default("active")
+  resolvedAt  DateTime?
+  createdAt   DateTime  @default(now())
+  user        User      @relation(fields: [userId], references: [id])
+}
+
+model Recording {
+  id          String   @id @default(cuid())
+  userId      String
+  audioUrl    String
+  transcript  String?
+  duration    Int
+  threatLevel String
+  analyzedAt  DateTime @default(now())
+  user        User     @relation(fields: [userId], references: [id])
+}
